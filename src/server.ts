@@ -1,13 +1,9 @@
-import express from "express";
+import { env } from "./config/env.js";
+import { createApp } from "./app.js";
 
-const app = express();
-const port = process.env.PORT ?? 3000;
+const app = createApp();
 
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
-});
-
-app.listen(port, () => {
+app.listen(env.PORT, () => {
   // eslint-disable-next-line no-console
-  console.log(`Server listening on :${port}`);
+  console.log(`Server listening on :${env.PORT}`);
 });
