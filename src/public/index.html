@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Voice Agent Demo</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="panel">
+        <h1>Insurance Voice Agent</h1>
+        <p class="subtitle">Upload audio and run the full voice pipeline.</p>
+
+        <div class="row">
+          <button id="newSession">New Session</button>
+          <button id="endSession" class="ghost">End Session</button>
+        </div>
+
+        <p id="sessionBadge" class="badge">Session: not started</p>
+
+        <form id="turnForm">
+          <label for="audioInput">Audio file</label>
+          <input id="audioInput" type="file" accept="audio/*" required />
+          <button type="submit">Run Turn</button>
+        </form>
+      </section>
+
+      <section class="panel output">
+        <h2>Result</h2>
+        <pre id="resultBox">No turn executed yet.</pre>
+        <audio id="player" controls></audio>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
