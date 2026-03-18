@@ -41,6 +41,10 @@ export function buildApiRouter(
     res.json({ sessions: memory.listSessions() });
   });
 
+  router.get("/memory/customers", (_req, res) => {
+    res.json({ customers: memory.listCustomerProfiles() });
+  });
+
   router.post("/session/end", express.json(), (req, res) => {
     const parsed = z.object({ sessionId: z.string().min(1) }).safeParse(req.body);
     if (!parsed.success) {

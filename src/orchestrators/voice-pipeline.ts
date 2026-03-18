@@ -29,8 +29,16 @@ export class VoicePipeline {
     );
     const intent = llmTimed.value;
 
+    if (intent.responseLanguage) {
+      this.memory.setPreferredLanguage(request.sessionId, intent.responseLanguage);
+    }
+
     if (intent.extractedEntities.customerName) {
-      this.memory.setCustomerName(request.sessionId, intent.extractedEntities.customerName);
+      this.memory.setCustomerName(
+        request.sessionId,
+        intent.extractedEntities.customerName,
+        intent.responseLanguage
+      );
     }
 
     const action = this.actionService.run(intent, this.memory.getSession(request.sessionId));
@@ -40,7 +48,11 @@ export class VoicePipeline {
       { role: "assistant", content: action.message }
     ]);
 
-    const ttsTimed = await measureAsync(async () => this.tts.synthesize(action.message));
+    this.memory.recordTurn(request.sessionId, intent, action);
+
+    const ttsTimed = await measureAsync(async () =>
+      this.tts.synthesize(action.message, intent.responseLanguage)
+    );
 
     const latency = {
       sttMs: sttTimed.ms,

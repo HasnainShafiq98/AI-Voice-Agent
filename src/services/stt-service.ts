@@ -12,22 +12,43 @@ interface WhisperOutput {
   text: string;
 }
 
+function resolveWhisperConfig(): { model: string; language: string | null } {
+  const configuredModel = env.WHISPER_MODEL.trim();
+  const configuredLanguage = env.WHISPER_LANGUAGE.trim().toLowerCase();
+  const isAutoLanguage = configuredLanguage === "auto" || configuredLanguage === "detect";
+
+  const requestedLanguage = isAutoLanguage ? null : configuredLanguage;
+  const needsMultilingualModel =
+    configuredModel.endsWith(".en") && requestedLanguage !== "en";
+
+  const effectiveModel = needsMultilingualModel
+    ? configuredModel.replace(/\.en$/, "")
+    : configuredModel;
+
+  return { model: effectiveModel, language: requestedLanguage };
+}
+
 export class SttService {
   async transcribe(audioPath: string): Promise<string> {
     const outputDir = paths.outputsDir;
     const base = path.basename(audioPath, path.extname(audioPath));
+    const { model, language } = resolveWhisperConfig();
 
-    await execFileAsync(env.WHISPER_BINARY, [
+    const whisperArgs = [
       audioPath,
       "--model",
-      env.WHISPER_MODEL,
-      "--language",
-      env.WHISPER_LANGUAGE,
+      model,
       "--output_format",
       "json",
       "--output_dir",
       outputDir
-    ]);
+    ];
+
+    if (language) {
+      whisperArgs.push("--language", language);
+    }
+
+    await execFileAsync(env.WHISPER_BINARY, whisperArgs);
 
     const jsonPath = path.join(outputDir, `${base}.json`);
     if (!fs.existsSync(jsonPath)) {

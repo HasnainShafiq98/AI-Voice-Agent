@@ -3,6 +3,7 @@ import { promisify } from "node:util";
 import { execFile } from "node:child_process";
 import { nanoid } from "nanoid";
 import { env } from "../config/env.js";
+import type { ResponseLanguage } from "../types/index.js";
 import { paths } from "../utils/fs.js";
 
 const execFileAsync = promisify(execFile);
@@ -16,24 +17,43 @@ function normalizeForSpeech(text: string): string {
   });
 }
 
+async function convertToMp3(inputPath: string, outputPath: string): Promise<void> {
+  await execFileAsync("ffmpeg", [
+    "-loglevel",
+    "error",
+    "-i",
+    inputPath,
+    "-b:a",
+    "192k",
+    "-q:a",
+    "4",
+    outputPath
+  ]);
+}
+
 export class TtsService {
-  async synthesize(text: string): Promise<string> {
+  async synthesize(text: string, language: ResponseLanguage = "en"): Promise<string> {
     const fileName = `speech-${Date.now()}-${nanoid(4)}`;
     const aiffPath = path.join(paths.outputsDir, `${fileName}.aiff`);
+    const wavPath = path.join(paths.outputsDir, `${fileName}.wav`);
     const mp3Path = path.join(paths.outputsDir, `${fileName}.mp3`);
     const spokenText = normalizeForSpeech(text);
+    const requestedVoice = language === "de" ? env.TTS_VOICE_DE : env.TTS_VOICE;
 
-    // Generate AIFF from text
-    await execFileAsync("say", ["-v", env.TTS_VOICE, "-o", aiffPath, spokenText]);
-
-    // Convert AIFF to MP3 for browser compatibility (suppress ffmpeg logs)
-    await execFileAsync("ffmpeg", [
-      "-loglevel", "error",
-      "-i", aiffPath,
-      "-b:a", "192k",
-      "-q:a", "4",
-      mp3Path
-    ]);
+    // Prefer macOS native `say`; fall back to `espeak` for Linux containers.
+    try {
+      await execFileAsync("say", ["-v", requestedVoice, "-o", aiffPath, spokenText]);
+      await convertToMp3(aiffPath, mp3Path);
+    } catch {
+      try {
+        const espeakVoice = language === "de" ? "de" : "en";
+        await execFileAsync("espeak", ["-v", espeakVoice, "-w", wavPath, spokenText]);
+        await convertToMp3(wavPath, mp3Path);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`TTS failed: macOS say unavailable and espeak fallback failed: ${message}`);
+      }
+    }
 
     return mp3Path;
   }

@@ -4,5 +4,6 @@ dist/
 uploads/
 outputs/
 logs/
+/data/
 coverage/
 .DS_Store
