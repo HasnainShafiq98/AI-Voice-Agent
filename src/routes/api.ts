@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import path from "node:path";
 import express from "express";
 import multer from "multer";
@@ -86,15 +85,6 @@ export function buildApiRouter(
       const message = error instanceof Error ? error.message : "unknown error";
       res.status(500).json({ error: message });
     }
-  });
-
-  router.get("/audio/:file", (req, res) => {
-    const target = path.join(paths.outputsDir, path.basename(req.params.file));
-    if (!fs.existsSync(target)) {
-      res.status(404).json({ error: "audio not found" });
-      return;
-    }
-    res.sendFile(target);
   });
 
   return router;
