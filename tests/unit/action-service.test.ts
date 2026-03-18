@@ -24,10 +24,24 @@ function buildIntent(intent: IntentResult["intent"]): IntentResult {
 describe("ActionService", () => {
   const service = new ActionService();
 
-  it("handles policy enquiry", () => {
-    const result = service.run(buildIntent("policy_enquiry"), buildSession("Sam"));
+  it("asks for policy ID when policy enquiry is missing policyId", () => {
+    const intent = buildIntent("policy_enquiry");
+    intent.replyDraft = "Hello Sam, please provide your policy ID to check status.";
+
+    const result = service.run(intent, buildSession("Sam"));
+    expect(result.status).toBe("success");
+    expect(result.data.needsPolicyId).toBe("true");
+    expect(result.message).toContain("provide your policy ID");
+  });
+
+  it("handles policy enquiry with provided policyId", () => {
+    const intent = buildIntent("policy_enquiry");
+    intent.extractedEntities.policyId = "POL-OCTGIB";
+
+    const result = service.run(intent, buildSession("Sam"));
     expect(result.status).toBe("success");
     expect(result.data.policyStatus).toBe("Active");
+    expect(result.data.policyId).toBe("POL-OCTGIB");
     expect(result.message).toContain("Sam");
   });
 

@@ -6,7 +6,22 @@ export class ActionService {
     const namePrefix = session.entities.customerName ? `${session.entities.customerName}, ` : "";
 
     if (intentResult.intent === "policy_enquiry") {
-      const policyId = intentResult.extractedEntities.policyId ?? `POL-${nanoid(6).toUpperCase()}`;
+      const providedPolicyId = intentResult.extractedEntities.policyId?.trim();
+
+      if (!providedPolicyId) {
+        return {
+          type: "policy_enquiry",
+          status: "success",
+          data: {
+            needsPolicyId: "true"
+          },
+          message:
+            intentResult.replyDraft ||
+            `${namePrefix}please provide your policy ID to check your policy status.`
+        };
+      }
+
+      const policyId = providedPolicyId;
       return {
         type: "policy_enquiry",
         status: "success",
