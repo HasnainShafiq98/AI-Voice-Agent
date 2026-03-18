@@ -18,6 +18,7 @@ Instructions:
 JSON structure (EXACTLY this format):
 {
   "intent": "policy_enquiry",
+  "responseLanguage": "en",
   "confidence": 0.95,
   "extractedEntities": {
     "customerName": null,
@@ -39,7 +40,8 @@ Intent definitions:
 Rules:
 1. Return ONLY valid JSON, nothing else
 2. If user provides a name, set customerName
-3. Set confidence high (>0.7) only if intent is clear
-4. Keep replyDraft under 20 words
-5. All fields must be present in response
+3. Set responseLanguage to "de" for German user messages, otherwise "en"
+4. Set confidence high (>0.7) only if intent is clear
+5. Keep replyDraft under 20 words
+6. All fields must be present in response
 `.trim();

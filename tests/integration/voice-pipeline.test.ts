@@ -20,7 +20,7 @@ class StubIntentService {
 }
 
 class StubTtsService {
-  async synthesize(_text: string): Promise<string> {
+  async synthesize(_text: string, _language?: "en" | "de"): Promise<string> {
     return "outputs/fake.aiff";
   }
 }

@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+.git
+.gitignore
+.env
+logs
+outputs
+uploads
+data
+*.log
+.DS_Store
+Case Study.pdf

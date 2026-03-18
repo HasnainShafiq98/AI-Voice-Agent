@@ -11,6 +11,11 @@ interface EventRecord {
   };
 }
 
+function isValidRuntimeRecord(record: EventRecord): boolean {
+  const { sttMs, llmMs, ttsMs, totalMs } = record.metrics;
+  return sttMs > 0 && llmMs > 0 && ttsMs > 0 && totalMs > 0;
+}
+
 function summarize(values: number[]): { min: number; max: number; avg: number; p95: number } {
   const sorted = [...values].sort((a, b) => a - b);
   const sum = sorted.reduce((acc, n) => acc + n, 0);
@@ -40,9 +45,31 @@ if (records.length === 0) {
   process.exit(0);
 }
 
-const stt = summarize(records.map((r) => r.metrics.sttMs));
-const llm = summarize(records.map((r) => r.metrics.llmMs));
-const tts = summarize(records.map((r) => r.metrics.ttsMs));
-const total = summarize(records.map((r) => r.metrics.totalMs));
+const runtimeRecords = records.filter(isValidRuntimeRecord);
 
-console.log(JSON.stringify({ sampleSize: records.length, stt, llm, tts, total }, null, 2));
+if (runtimeRecords.length === 0) {
+  console.log("No valid runtime latency events found (all entries were zero or invalid).");
+  process.exit(0);
+}
+
+const stt = summarize(runtimeRecords.map((r) => r.metrics.sttMs));
+const llm = summarize(runtimeRecords.map((r) => r.metrics.llmMs));
+const tts = summarize(runtimeRecords.map((r) => r.metrics.ttsMs));
+const total = summarize(runtimeRecords.map((r) => r.metrics.totalMs));
+
+const excluded = records.length - runtimeRecords.length;
+
+console.log(
+  JSON.stringify(
+    {
+      sampleSize: runtimeRecords.length,
+      excludedRecords: excluded,
+      stt,
+      llm,
+      tts,
+      total
+    },
+    null,
+    2
+  )
+);

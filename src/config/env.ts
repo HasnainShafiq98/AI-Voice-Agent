@@ -8,10 +8,11 @@ const schema = z.object({
   OLLAMA_API_URL: z.string().url(),
   OLLAMA_API_KEY: z.string().min(1),
   OLLAMA_MODEL: z.string().default("llama3.1"),
-  WHISPER_MODEL: z.string().default("base.en"),
-  WHISPER_LANGUAGE: z.string().default("en"),
+  WHISPER_MODEL: z.string().default("base"),
+  WHISPER_LANGUAGE: z.string().default("auto"),
   WHISPER_BINARY: z.string().default("whisper"),
-  TTS_VOICE: z.string().default("Samantha")
+  TTS_VOICE: z.string().default("Samantha"),
+  TTS_VOICE_DE: z.string().default("Anna")
 });
 
 export const env = schema.parse(process.env);

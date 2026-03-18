@@ -4,6 +4,8 @@ export type IntentType =
   | "schedule_appointment"
   | "unknown_intent";
 
+export type ResponseLanguage = "en" | "de";
+
 export interface PromptVersion {
   version: string;
   updatedAt: string;
@@ -12,6 +14,18 @@ export interface PromptVersion {
 
 export interface SessionEntityMemory {
   customerName?: string;
+  preferredLanguage?: ResponseLanguage;
+  isReturningCustomer?: boolean;
+  lastPolicyId?: string;
+}
+
+export interface CustomerProfile {
+  customerName: string;
+  preferredLanguage: ResponseLanguage;
+  turnCount: number;
+  lastIntent?: IntentType;
+  lastPolicyId?: string;
+  updatedAt: string;
 }
 
 export interface Message {
@@ -42,6 +56,7 @@ export interface LatencyMetrics {
 export interface IntentResult {
   intent: IntentType;
   confidence: number;
+  responseLanguage?: ResponseLanguage;
   extractedEntities: {
     customerName?: string;
     policyId?: string;
